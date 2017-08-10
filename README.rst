@@ -1,6 +1,6 @@
 Jirachi
 =================================
-.. image:: icon.png
+.. image:: https://github.com/RyanKung/jirachi/raw/master/icon.png
    :height: 100px
    :width: 200px
    :scale: 100 %
