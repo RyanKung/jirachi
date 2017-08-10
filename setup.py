@@ -9,7 +9,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 _CWD = os.path.dirname(__file__)
 
 NAME = 'jirachi'
-DESCRIPTION = 'jirachi is a actor model IO framework based on pulsar'
+DESCRIPTION = 'jirachi is an IO framework based on actor model'
 AUTHOR = 'ryankung'
 EMAIL = 'ryankung@ieee.org'
 INSTALL_REQUIRES = [i for i in open(os.path.join(_CWD, 'requirements.txt')).readlines()
