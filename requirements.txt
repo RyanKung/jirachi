@@ -1,0 +1,4 @@
+pulsar==1.6.4
+uvloop==0.8.0
+asyncpg==0.11.0
+pwsgi==0.1.10
