@@ -9,4 +9,9 @@ Jirachi
     pip install jirachi
 
 * For postgresDB Monitor::
+
     pip install asyncpg
+
+* For mongoDB Monitor::
+
+    pip install motor
