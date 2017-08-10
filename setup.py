@@ -34,7 +34,7 @@ def find_version(*file_paths):
 setup(
     name=NAME,
     description=DESCRIPTION,
-    long_description=open(os.path.join(here, 'README.md')).read(),
+    long_description=open(os.path.join(here, 'README.rst')).read(),
     version=find_version('jirachi', '__init__.py'),
     packages=find_packages(exclude=['examples', 'tests', 'docs']),
     install_requires=INSTALL_REQUIRES,
