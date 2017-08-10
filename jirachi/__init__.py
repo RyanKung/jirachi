@@ -2,15 +2,14 @@ from pulsar.apps import MultiApp
 from pulsar.apps.wsgi.handlers import WsgiHandler
 from pulsar.apps.wsgi import WSGIServer
 from jirachi.core import wsgi
-from jirachi.io import PostgresMonitor
 from jirachi.io import RequestMonitor
 from jirachi.io import SchedulerMonitor
 
 __all__ = ['wsgi', 'ComposedApp', 'ComposedIO',
-           'PostgresMonitor', 'RequestMonitor', 'SchedulerMonitor']
+           'RequestMonitor', 'SchedulerMonitor']
 
 
-__version__ = '0.1.2.3'
+__version__ = '0.1.2.4'
 
 
 class ComposedIO(MultiApp):
