@@ -7,6 +7,6 @@ Jirachi
 * Installation::
 
     pip install jirachi
-  
 
-
+* For postgresDB Monitor::
+    pip install asyncpg
