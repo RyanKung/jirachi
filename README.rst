@@ -6,7 +6,7 @@ Jirachi
    :scale: 100 %
    :align: center
 
-`jirachi` is an IO framework based on actor model
+`jirachi` is an actor model based IO framework
 
 * Installation::
 
