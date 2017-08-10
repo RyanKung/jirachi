@@ -1,6 +1,10 @@
 Jirachi
 =================================
-
+.. image:: icon.png
+   :height: 100px
+   :width: 200px
+   :scale: 100 %
+   :align: center
 
 `jirachi` is an IO framework based on actor model
 
