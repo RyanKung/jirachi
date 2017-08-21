@@ -19,7 +19,7 @@ async def update(sql):
 
 async def insert(sql):
     print(sql)
-    return await PostgresMonitor.execute(sql)
+    return await PostgresMonitor.fetch(sql)
 
 
 class QuerySet(object):
