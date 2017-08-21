@@ -19,9 +19,14 @@ class PostgresMonitor(JirachiMonitor):
         return await actor.conn.execute(sql)
 
     @staticmethod
-    async def _fetch(actor, sql) -> dict:
+    async def _fetchrow(actor, sql) -> dict:
         res = await actor.conn.fetchrow(sql)
         return dict(res)
+
+    @staticmethod
+    async def _fetch(actor, sql) -> dict:
+        res = await actor.conn.fetch(sql)
+        return list(map(dict, res))
 
     @staticmethod
     async def _transaction(actor, sqls) -> str:
@@ -54,6 +59,11 @@ class PostgresMonitor(JirachiMonitor):
     async def fetch(cls, sql: str) -> Record:
         monitor = await cls.get_monitor()
         return await send(monitor, 'run', cls._fetch, sql)
+
+    @classmethod
+    async def fetchrow(cls, sql: str) -> Record:
+        monitor = await cls.get_monitor()
+        return await send(monitor, 'run', cls._fetchrow, sql)
 
     @classmethod
     async def transaction(cls, sqls: Iterable[str]) -> str:

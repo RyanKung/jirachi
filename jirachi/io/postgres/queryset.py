@@ -8,18 +8,15 @@ key = str(time.time())
 
 
 async def query(sql):
-    print(sql)
     return await PostgresMonitor.fetch(sql)
 
 
 async def update(sql):
-    print(sql)
     return await PostgresMonitor.execute(sql)
 
 
 async def insert(sql):
-    print(sql)
-    return await PostgresMonitor.fetch(sql)
+    return await PostgresMonitor.fetchrow(sql)
 
 
 class QuerySet(object):
@@ -84,7 +81,7 @@ class QuerySet(object):
             'fields': utils.concat(map(utils.wrap_key, self.fields)),
             'id': oid
         }))
-        return res and dict(zip(self.fields, res[0])) if res else None
+        return res and dict(res) if res else None
 
     async def get_by(self, *args, **kwargs):
         data = self.format(kwargs)
@@ -95,7 +92,7 @@ class QuerySet(object):
             'offset': '0',
             'fields': utils.concat(map(utils.wrap_key, self.fields)),
         }))
-        return res and dict(zip(self.fields, res[0]))
+        return res and dict(res[0])
 
     async def search(self, key, value, start, limit, filters=''):
         return await query(self._sql['search'].format(**{
@@ -124,7 +121,7 @@ class QuerySet(object):
             }) or ''
 
         }))
-        return [dict(zip(self.fields, r)) for r in res]
+        return [dict(r) for r in res]
 
     async def find_in(self, key, targets, fields=[]) -> dict:
         return await query(self._sql['filter_in'].format(**{
@@ -144,7 +141,7 @@ class QuerySet(object):
             'start': utils.wrap_value(start),
             'end': utils.wrap_value(end)
         }))
-        return [dict(zip(self.fields, r)) for r in res]
+        return [dict(r) for r in res]
 
     async def find_in_range(self, key, start, end, fields=[], *args, **kwargs) -> dict:
         data = self.format(kwargs)
@@ -156,7 +153,7 @@ class QuerySet(object):
             'start': utils.wrap_value(start),
             'end': utils.wrap_value(end)
         }))
-        return [dict(zip(self.fields, r)) for r in res]
+        return [dict(r) for r in res]
 
     async def count(self, field):
         field = utils.escape(field) or '*'
@@ -183,7 +180,7 @@ class QuerySet(object):
             'fields': utils.concat(map(utils.wrap_key, self.fields)),
             'offset': str(int(offset))
         }))
-        return [dict(zip(self.fields, r)) for r in res]
+        return [dict(r) for r in res]
 
     async def sortby(self, sort_key='id', offset=0, limit=100, extra="", decr=False, *args, **kwargs):
         data = self.format(kwargs)
