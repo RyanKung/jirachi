@@ -12,7 +12,7 @@ async def query(sql):
 
 
 async def update(sql):
-    return await PostgresMonitor.execute(sql)
+    return await PostgresMonitor.fetch(sql)
 
 
 async def insert(sql):
