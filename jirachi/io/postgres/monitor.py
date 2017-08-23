@@ -1,6 +1,7 @@
 from typing import Iterable
 import asyncpg
 from asyncpg import Record
+from asyncpg.exceptions import InterfaceError
 from pulsar import send
 from jirachi.io.abstract import JirachiMonitor
 
@@ -18,21 +19,40 @@ class PostgresMonitor(JirachiMonitor):
     async def _execute(actor, sql) -> str:
         return await actor.conn.execute(sql)
 
-    @staticmethod
-    async def _fetchrow(actor, sql) -> dict:
-        res = await actor.conn.fetchrow(sql)
+    @classmethod
+    async def _fetchrow(cls, actor, sql) -> dict:
+        if actor.is_monitor and actor.managed_actors:
+            worker = await cls.get_worker()
+            return await send(worker, 'run', cls._fetchrow, sql)
+        try:
+            res = await actor.conn.fetchrow(sql)
+        except InterfaceError:
+            res = await cls.fetch(sql)
         return dict(res)
 
-    @staticmethod
-    async def _fetch(actor, sql) -> dict:
-        res = await actor.conn.fetch(sql)
+    @classmethod
+    async def _fetch(cls, actor, sql) -> dict:
+        if actor.is_monitor and actor.managed_actors:
+            worker = await cls.get_worker()
+            return await send(worker, 'run', cls._fetch, sql)
+        try:
+            res = await actor.conn.fetch(sql)
+        except InterfaceError:
+            res = await cls.fetch(sql)
         return list(map(dict, res))
 
-    @staticmethod
-    async def _transaction(actor, sqls) -> str:
-        async with actor.conn.transaction():
-            res = [await actor.conn.execute(s) for s in sqls]
-        return res
+    @classmethod
+    async def _transaction(cls, actor, sqls) -> str:
+
+        if actor.is_monitor and actor.managed_actors:
+            worker = await cls.get_worker()
+            return await send(worker, 'run', cls._transaction, sqls)
+        try:
+            async with actor.conn.transaction():
+                res = [await actor.conn.execute(s) for s in sqls]
+        except InterfaceError:
+            res = await cls.transaction(sqls)
+        return dict(res)
 
     async def monitor_start(self, monitor, exec=None):
         monitor.conn = await asyncpg.connect(**self.cfg.pgconf)
