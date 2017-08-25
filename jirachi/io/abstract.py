@@ -1,5 +1,6 @@
 from pulsar import get_application, get_actor, send
 from pulsar.apps import Application
+from itertools import count
 from random import randint
 
 
@@ -14,6 +15,9 @@ class JirachiMonitor(Application):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    async def monitor_start(self, monitor, exec=None):
+        monitor.counter = count(0)
 
     @classmethod
     async def get_arbiter(cls):
@@ -33,13 +37,13 @@ class JirachiMonitor(Application):
         return monitor or await get_monitor_via_arbiter()
 
     @classmethod
-    async def get_worker(cls, monitor=None):
-
-        if not monitor:
-            monitor = await cls.get_monitor()
+    async def get_worker(cls, monitor):
         workers = monitor.managed_actors
         if workers:
-            index = randint(0, len(workers) - 1)
+            if not monitor.counter:
+                index = randint(0, len(workers) - 1)
+            else:
+                index = next(monitor.counter) % len(workers)
             wid = list(workers.keys())[index]
             worker = get_actor().get_actor(wid)
         return worker

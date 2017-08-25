@@ -22,7 +22,7 @@ class PostgresMonitor(JirachiMonitor):
     @classmethod
     async def _fetchrow(cls, actor, sql) -> dict:
         if actor.is_monitor and actor.managed_actors:
-            worker = await cls.get_worker()
+            worker = await cls.get_worker(monitor=actor)
             return await send(worker, 'run', cls._fetchrow, sql)
         try:
             res = await actor.conn.fetchrow(sql)
@@ -33,7 +33,7 @@ class PostgresMonitor(JirachiMonitor):
     @classmethod
     async def _fetch(cls, actor, sql) -> dict:
         if actor.is_monitor and actor.managed_actors:
-            worker = await cls.get_worker()
+            worker = await cls.get_worker(monitor=actor)
             return await send(worker, 'run', cls._fetch, sql)
         try:
             res = await actor.conn.fetch(sql)
@@ -45,7 +45,7 @@ class PostgresMonitor(JirachiMonitor):
     async def _transaction(cls, actor, sqls) -> str:
 
         if actor.is_monitor and actor.managed_actors:
-            worker = await cls.get_worker()
+            worker = await cls.get_worker(monitor=actor)
             return await send(worker, 'run', cls._transaction, sqls)
         try:
             async with actor.conn.transaction():
@@ -55,6 +55,7 @@ class PostgresMonitor(JirachiMonitor):
         return dict(res)
 
     async def monitor_start(self, monitor, exec=None):
+        await super().monitor_start(monitor, exec)
         monitor.conn = await asyncpg.connect(**self.cfg.pgconf)
 
     async def monitor_stopping(self, monitor, exec=None):
