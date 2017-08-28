@@ -3,7 +3,8 @@ import asyncpg
 from asyncpg import Record
 from asyncpg.exceptions import InterfaceError
 from pulsar import send
-from jirachi.io.abstract import JirachiMonitor
+from jirachi.io.abstract import JirachiMonitor, JirachiWorkerNotFound
+import traceback
 
 
 __all__ = ['PostgresMonitor']
@@ -22,37 +23,49 @@ class PostgresMonitor(JirachiMonitor):
     @classmethod
     async def _fetchrow(cls, actor, sql) -> dict:
         if actor.is_monitor and actor.managed_actors:
-            worker = await cls.get_worker(monitor=actor)
-            return await send(worker, 'run', cls._fetchrow, sql)
+            try:
+                worker = await cls.get_worker(monitor=actor)
+                return await send(worker, 'run', cls._fetchrow, sql)
+            except JirachiWorkerNotFound:
+                traceback.print_exc()
         try:
             res = await actor.conn.fetchrow(sql)
         except InterfaceError:
+            traceback.print_exc()
             res = await cls.fetch(sql)
         return dict(res)
 
     @classmethod
     async def _fetch(cls, actor, sql) -> dict:
+
         if actor.is_monitor and actor.managed_actors:
-            worker = await cls.get_worker(monitor=actor)
-            return await send(worker, 'run', cls._fetch, sql)
+            try:
+                worker = await cls.get_worker(monitor=actor)
+                return await send(worker, 'run', cls._fetch, sql)
+            except JirachiWorkerNotFound:
+                traceback.print_exc()
         try:
             res = await actor.conn.fetch(sql)
         except InterfaceError:
+            traceback.print_exc()
             res = await cls.fetch(sql)
         return list(map(dict, res))
 
     @classmethod
     async def _transaction(cls, actor, sqls) -> str:
-
         if actor.is_monitor and actor.managed_actors:
-            worker = await cls.get_worker(monitor=actor)
-            return await send(worker, 'run', cls._transaction, sqls)
+            try:
+                worker = await cls.get_worker(monitor=actor)
+                return await send(worker, 'run', cls._transaction, sqls)
+            except JirachiWorkerNotFound:
+                traceback.print_exc()
         try:
             async with actor.conn.transaction():
                 res = [await actor.conn.execute(s) for s in sqls]
-        except InterfaceError:
+        except InterfaceError as e:
+            traceback.print_exc()
             res = await cls.transaction(sqls)
-        return dict(res)
+        return res
 
     async def monitor_start(self, monitor, exec=None):
         await super().monitor_start(monitor, exec)

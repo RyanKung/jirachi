@@ -7,6 +7,10 @@ from random import randint
 __all__ = ['JirachiMonitor', 'JirachiMonitorNotFound']
 
 
+class JirachiWorkerNotFound(Exception):
+    pass
+
+
 class JirachiMonitorNotFound(Exception):
     pass
 
@@ -38,7 +42,9 @@ class JirachiMonitor(Application):
 
     @classmethod
     async def get_worker(cls, monitor):
-        workers = monitor.managed_actors
+        workers = {id: actor
+                   for id, actor in monitor.managed_actors.items()
+                   if actor.info}
         if workers:
             if not monitor.counter:
                 index = randint(0, len(workers) - 1)
@@ -46,7 +52,9 @@ class JirachiMonitor(Application):
                 index = next(monitor.counter) % len(workers)
             wid = list(workers.keys())[index]
             worker = get_actor().get_actor(wid)
-        return worker
+            return worker
+        raise JirachiWorkerNotFound(
+            {k: v.__dict__ for k, v in monitor.managed_actors.items()})
 
     @classmethod
     async def kill(cls):

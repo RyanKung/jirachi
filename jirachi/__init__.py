@@ -9,7 +9,7 @@ __all__ = ['wsgi', 'ComposedApp', 'ComposedIO',
            'RequestMonitor', 'SchedulerMonitor']
 
 
-__version__ = '0.1.2.12'
+__version__ = '0.1.2.13'
 
 
 class ComposedIO(MultiApp):
