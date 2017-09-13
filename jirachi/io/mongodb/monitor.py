@@ -9,7 +9,11 @@ class MongoDBMonitor(MongoDBMonitor):
     name = "mongodb"
 
     async def monitor_start(self, monitor, exec=None):
+        self.cfg.set('workers', 0)
         monitor.client = await AsyncIOMotorClient(self.cfg.mongoconf)
+
+    async def worker_start(self, worker, exec=None):
+        worker.client = await AsyncIOMotorClient(self.cfg.mongoconf)
 
     async def _insert_one(actor, db, collect, data):
         return await actor[db][collect].insert_one(data)
